@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{% block title %}UVA Food Rating{% endblock %}</title>
+    <style>
+      body { font-family: Arial, sans-serif; margin: 0; background: #f7f7f8; color: #1f2937; }
+      nav { background: #111827; color: #f9fafb; padding: 0.9rem 1.25rem; display: flex; gap: 1rem; align-items: center; }
+      nav a { color: #f9fafb; text-decoration: none; font-weight: 600; }
+      nav .spacer { flex: 1; }
+      .container { max-width: 1100px; margin: 1rem auto; padding: 0 1rem 1rem; }
+      .card { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; }
+      .grid { display: grid; gap: 0.75rem; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+      input, select, textarea, button { padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 6px; font-size: 0.95rem; }
+      textarea { min-height: 90px; width: 100%; }
+      button { background: #2563eb; color: #fff; cursor: pointer; }
+      button.danger { background: #dc2626; }
+      button.muted { background: #4b5563; }
+      table { width: 100%; border-collapse: collapse; }
+      th, td { text-align: left; padding: 0.6rem; border-bottom: 1px solid #e5e7eb; vertical-align: top; }
+      .alerts { margin-bottom: 1rem; }
+      .alert { padding: 0.65rem 0.8rem; border-radius: 6px; margin-bottom: 0.5rem; }
+      .alert-success { background: #dcfce7; color: #14532d; }
+      .alert-danger { background: #fee2e2; color: #7f1d1d; }
+      .alert-warning { background: #fef3c7; color: #78350f; }
+      .alert-info { background: #dbeafe; color: #1e3a8a; }
+      .muted-text { color: #6b7280; font-size: 0.9rem; }
+      .inline { display: inline; }
+      .row-actions { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+      .badge { display: inline-block; background: #e5e7eb; padding: 0.2rem 0.5rem; border-radius: 999px; font-size: 0.8rem; }
+    </style>
+    {% block head %}{% endblock %}
+  </head>
+  <body>
+    <nav>
+      <a href="{{ url_for('dishes.list_dishes') }}">Dishes</a>
+      {% if current_user.is_authenticated %}
+        <a href="{{ url_for('social.favorites') }}">Favorites</a>
+        <a href="{{ url_for('social.friends') }}">Friends</a>
+        <a href="{{ url_for('auth.profile') }}">Profile</a>
+        {% if current_user.admin %}
+          <a href="{{ url_for('admin.dashboard') }}">Admin</a>
+        {% endif %}
+        <span class="spacer"></span>
+        <span>Hi, {{ current_user.username }}</span>
+        <form method="post" action="{{ url_for('auth.logout') }}" class="inline">
+          <button type="submit" class="muted">Logout</button>
+        </form>
+      {% else %}
+        <span class="spacer"></span>
+        <a href="{{ url_for('auth.login') }}">Login</a>
+        <a href="{{ url_for('auth.register') }}">Register</a>
+      {% endif %}
+    </nav>
+    <main class="container">
+      <div class="alerts">
+        {% for category, message in get_flashed_messages(with_categories=true) %}
+          <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+      {% block content %}{% endblock %}
+    </main>
+  </body>
+</html>

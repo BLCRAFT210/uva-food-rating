@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% block title %}Dishes{% endblock %}
+{% block head %}
+  <script defer src="{{ url_for('static', filename='js/dishes.js') }}"></script>
+{% endblock %}
+{% block content %}
+  <section class="card">
+    <h2>Dishes</h2>
+    <form id="dish-filter-form" class="grid">
+      <label>
+        Search
+        <input type="text" name="search" value="{{ request.args.get('search', '') }}" placeholder="Dish or location" />
+      </label>
+      <label>
+        Location
+        <select name="location_id">
+          <option value="">All locations</option>
+          {% for location in locations %}
+            <option value="{{ location.location_id }}" {% if request.args.get('location_id') == location.location_id|string %}selected{% endif %}>
+              {{ location.location_name }}
+            </option>
+          {% endfor %}
+        </select>
+      </label>
+      <label>
+        Sort
+        <select name="sort">
+          <option value="avg_desc" {% if sort == 'avg_desc' %}selected{% endif %}>Avg Score (High-Low)</option>
+          <option value="avg_asc" {% if sort == 'avg_asc' %}selected{% endif %}>Avg Score (Low-High)</option>
+          <option value="name_asc" {% if sort == 'name_asc' %}selected{% endif %}>Name (A-Z)</option>
+          <option value="name_desc" {% if sort == 'name_desc' %}selected{% endif %}>Name (Z-A)</option>
+          <option value="favorites_desc" {% if sort == 'favorites_desc' %}selected{% endif %}>Most Favorited</option>
+          <option value="newest_rating_desc" {% if sort == 'newest_rating_desc' %}selected{% endif %}>Newest Rating</option>
+        </select>
+      </label>
+      <label>
+        <input type="checkbox" name="vegan" value="1" {% if request.args.get('vegan') %}checked{% endif %}/>
+        Vegan
+      </label>
+      <label>
+        <input type="checkbox" name="gluten_free" value="1" {% if request.args.get('gluten_free') %}checked{% endif %}/>
+        Gluten Free
+      </label>
+      <div>
+        <button type="submit">Apply Filters</button>
+      </div>
+    </form>
+  </section>
+
+  <section class="card" id="dishes-table-container">
+    {% include "dishes/_table.html" %}
+  </section>
+
+  {% if current_user.is_authenticated and current_user.admin %}
+    <section class="card">
+      <h3>Add Location</h3>
+      <form method="post" action="{{ url_for('dishes.create_location') }}" class="grid">
+        <label>
+          Location Name
+          <input type="text" name="location_name" required />
+        </label>
+        <div><button type="submit">Add Location</button></div>
+      </form>
+    </section>
+
+    <section class="card">
+      <h3>Edit / Delete Locations</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Location</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for location in locations %}
+            <tr>
+              <td>{{ location.location_name }}</td>
+              <td>
+                <div class="row-actions">
+                  <form method="post" action="{{ url_for('dishes.edit_location', location_id=location.location_id) }}">
+                    <input type="text" name="location_name" value="{{ location.location_name }}" required />
+                    <button type="submit" class="muted">Rename</button>
+                  </form>
+                  <form method="post" action="{{ url_for('dishes.delete_location', location_id=location.location_id) }}">
+                    <button type="submit" class="danger">Delete</button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+          {% else %}
+            <tr>
+              <td colspan="2">No locations created yet.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+
+    <section class="card">
+      <h3>Add Dish</h3>
+      <form method="post" action="{{ url_for('dishes.create_dish') }}">
+        <div class="grid">
+          <label>
+            Dish Name
+            <input type="text" name="dish_name" required />
+          </label>
+          <label>
+            Location
+            <select name="location_id">
+              <option value="">No location</option>
+              {% for location in locations %}
+                <option value="{{ location.location_id }}">{{ location.location_name }}</option>
+              {% endfor %}
+            </select>
+          </label>
+          <label><input type="checkbox" name="vegan" /> Vegan</label>
+          <label><input type="checkbox" name="gluten_free" /> Gluten Free</label>
+          <label><input type="checkbox" name="nuts" /> Contains Nuts</label>
+          <label><input type="checkbox" name="dairy" /> Contains Dairy</label>
+          <label><input type="checkbox" name="seafood" /> Contains Seafood</label>
+        </div>
+        <p><button type="submit">Create Dish</button></p>
+      </form>
+    </section>
+  {% endif %}
+{% endblock %}

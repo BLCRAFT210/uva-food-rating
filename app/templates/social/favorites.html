@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Favorites{% endblock %}
+{% block content %}
+  <section class="card">
+    <h2>My Favorites</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Dish</th>
+          <th>Location</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for dish in favorites %}
+          <tr>
+            <td>{{ dish.dish_name }}</td>
+            <td>{{ dish.location_name or "Unassigned" }}</td>
+            <td><a href="{{ url_for('dishes.dish_detail', dish_id=dish.dish_id) }}">Open</a></td>
+          </tr>
+        {% else %}
+          <tr>
+            <td colspan="3">No favorites yet.</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+{% endblock %}

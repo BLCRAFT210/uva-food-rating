@@ -1,0 +1,10 @@
+-- Replace placeholders before running:
+--   <APP_PASSWORD>, <DEV_PASSWORD>, <DB_NAME>
+
+CREATE USER IF NOT EXISTS 'app_user'@'%' IDENTIFIED BY '<APP_PASSWORD>';
+CREATE USER IF NOT EXISTS 'dev_admin'@'%' IDENTIFIED BY '<DEV_PASSWORD>';
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON <DB_NAME>.* TO 'app_user'@'%';
+GRANT ALL PRIVILEGES ON <DB_NAME>.* TO 'dev_admin'@'%';
+
+FLUSH PRIVILEGES;

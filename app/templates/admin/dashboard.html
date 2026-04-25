@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard{% endblock %}
+{% block content %}
+  <section class="card">
+    <h2>Admin Dashboard</h2>
+    <p class="muted-text">Manage user roles and review summary analytics for demo presentation.</p>
+  </section>
+
+  <section class="card">
+    <h3>Users</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Username</th>
+          <th>Email</th>
+          <th>Role</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for user in users %}
+          <tr>
+            <td>{{ user.user_id }}</td>
+            <td>{{ user.username }}</td>
+            <td>{{ user.email }}</td>
+            <td>{{ "Admin" if user.admin else "User" }}</td>
+            <td>
+              {% if current_user.user_id != user.user_id %}
+                <div class="row-actions">
+                  <form method="post" action="{{ url_for('admin.toggle_admin', user_id=user.user_id) }}">
+                    <button type="submit" class="muted">Toggle Role</button>
+                  </form>
+                  <form method="post" action="{{ url_for('admin.delete_user', user_id=user.user_id) }}">
+                    <button type="submit" class="danger">Delete</button>
+                  </form>
+                </div>
+              {% endif %}
+            </td>
+          </tr>
+        {% else %}
+          <tr>
+            <td colspan="5">No users.</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+
+  <section class="card">
+    <h3>Most Favorited Dishes</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Dish</th>
+          <th>Favorite Count</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in top_favorites %}
+          <tr>
+            <td>{{ row.dish_name }}</td>
+            <td>{{ row.favorite_count }}</td>
+          </tr>
+        {% else %}
+          <tr>
+            <td colspan="2">No data.</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+
+  <section class="card">
+    <h3>Latest Rating by User</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>User</th>
+          <th>Dish</th>
+          <th>Score</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in recent_by_user %}
+          <tr>
+            <td>{{ row.username }}</td>
+            <td>{{ row.dish_name }}</td>
+            <td>{{ row.score }}</td>
+            <td>{{ row.date_time }}</td>
+          </tr>
+        {% else %}
+          <tr>
+            <td colspan="4">No ratings yet.</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+{% endblock %}

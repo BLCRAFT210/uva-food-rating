@@ -1,0 +1,28 @@
+<table>
+  <thead>
+    <tr>
+      <th>Dish</th>
+      <th>Location</th>
+      <th>Avg Score</th>
+      <th>Ratings</th>
+      <th>Favorites</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for dish in dishes %}
+      <tr>
+        <td>{{ dish.dish_name }}</td>
+        <td>{{ dish.location_name or "Unassigned" }}</td>
+        <td>{{ "%.1f"|format(dish.avg_score or 0) }}</td>
+        <td>{{ dish.rating_count }}</td>
+        <td>{{ dish.favorite_count }}</td>
+        <td><a href="{{ url_for('dishes.dish_detail', dish_id=dish.dish_id) }}">View</a></td>
+      </tr>
+    {% else %}
+      <tr>
+        <td colspan="6">No dishes found.</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>

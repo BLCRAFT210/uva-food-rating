@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Register{% endblock %}
+{% block content %}
+  <section class="card">
+    <h2>Create Account</h2>
+    <p class="muted-text">The first account registered becomes an admin to help bootstrap setup.</p>
+    <form method="post">
+      <div class="grid">
+        <label>
+          Username
+          <input type="text" name="username" required />
+        </label>
+        <label>
+          Email
+          <input type="email" name="email" required />
+        </label>
+        <label>
+          Password
+          <input type="password" name="password" required />
+        </label>
+        <label>
+          Profile Picture URL (optional)
+          <input type="url" name="profile_picture" />
+        </label>
+      </div>
+      <p><button type="submit">Register</button></p>
+    </form>
+  </section>
+{% endblock %}

@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+{% block title %}{{ dish.dish_name }}{% endblock %}
+{% block content %}
+  <section class="card">
+    <h2>{{ dish.dish_name }}</h2>
+    <p class="muted-text">
+      Location: {{ dish.location_name or "Unassigned" }}
+      {% if dish.vegan %}<span class="badge">Vegan</span>{% endif %}
+      {% if dish.gluten_free %}<span class="badge">Gluten Free</span>{% endif %}
+      {% if dish.nuts %}<span class="badge">Nuts</span>{% endif %}
+      {% if dish.dairy %}<span class="badge">Dairy</span>{% endif %}
+      {% if dish.seafood %}<span class="badge">Seafood</span>{% endif %}
+    </p>
+
+    {% if current_user.is_authenticated %}
+      <form method="post" action="{{ url_for('social.toggle_favorite') }}">
+        <input type="hidden" name="dish_id" value="{{ dish.dish_id }}" />
+        <button type="submit">{{ "Remove Favorite" if is_favorite else "Add Favorite" }}</button>
+      </form>
+    {% endif %}
+  </section>
+
+  {% if current_user.is_authenticated and current_user.admin %}
+    <section class="card">
+      <h3>Edit Dish</h3>
+      <form method="post" action="{{ url_for('dishes.edit_dish', dish_id=dish.dish_id) }}">
+        <div class="grid">
+          <label>
+            Dish Name
+            <input type="text" name="dish_name" value="{{ dish.dish_name }}" required />
+          </label>
+          <label>
+            Location
+            <select name="location_id">
+              <option value="">No location</option>
+              {% for location in locations %}
+                <option value="{{ location.location_id }}" {% if dish.location_id == location.location_id %}selected{% endif %}>
+                  {{ location.location_name }}
+                </option>
+              {% endfor %}
+            </select>
+          </label>
+          <label><input type="checkbox" name="vegan" {% if dish.vegan %}checked{% endif %} /> Vegan</label>
+          <label><input type="checkbox" name="gluten_free" {% if dish.gluten_free %}checked{% endif %} /> Gluten Free</label>
+          <label><input type="checkbox" name="nuts" {% if dish.nuts %}checked{% endif %} /> Contains Nuts</label>
+          <label><input type="checkbox" name="dairy" {% if dish.dairy %}checked{% endif %} /> Contains Dairy</label>
+          <label><input type="checkbox" name="seafood" {% if dish.seafood %}checked{% endif %} /> Contains Seafood</label>
+        </div>
+        <p class="row-actions">
+          <button type="submit">Save Dish</button>
+        </p>
+      </form>
+      <form method="post" action="{{ url_for('dishes.delete_dish', dish_id=dish.dish_id) }}">
+        <button type="submit" class="danger">Delete Dish</button>
+      </form>
+      {% if dish.accomm_id %}
+        <form method="post" action="{{ url_for('dishes.delete_accommodation', accomm_id=dish.accomm_id) }}">
+          <button type="submit" class="muted">Delete Accommodation Record</button>
+        </form>
+      {% endif %}
+    </section>
+  {% endif %}
+
+  {% if current_user.is_authenticated %}
+    <section class="card">
+      <h3>Add Rating</h3>
+      <form method="post" action="{{ url_for('ratings.create_rating') }}">
+        <input type="hidden" name="dish_id" value="{{ dish.dish_id }}" />
+        <div class="grid">
+          <label>
+            Score (0-100)
+            <input type="number" name="score" min="0" max="100" required />
+          </label>
+          <label>
+            Tags (comma-separated)
+            <input type="text" name="tags" placeholder="spicy, cheap, filling" />
+          </label>
+          <label>
+            Image URLs (comma-separated)
+            <input type="text" name="images" placeholder="https://..." />
+          </label>
+        </div>
+        <label>
+          Description
+          <textarea name="description"></textarea>
+        </label>
+        <p><button type="submit">Submit Rating</button></p>
+      </form>
+    </section>
+  {% endif %}
+
+  <section class="card">
+    <h3>Ratings</h3>
+    {% for rating in ratings %}
+      <article class="card">
+        <p>
+          <strong>{{ rating.username }}</strong>
+          rated <strong>{{ rating.score }}</strong>
+          <span class="muted-text">on {{ rating.date_time }}</span>
+        </p>
+        <p>{{ rating.description or "No description." }}</p>
+        {% if rating.tags %}
+          <p><span class="badge">Tags</span> {{ rating.tags }}</p>
+        {% endif %}
+        {% if rating.images %}
+          <p><span class="badge">Images</span> {{ rating.images }}</p>
+        {% endif %}
+        <p class="muted-text">👍 {{ rating.thumbs_up }} | 👎 {{ rating.thumbs_down }}</p>
+
+        {% if current_user.is_authenticated %}
+          <div class="row-actions">
+            <form method="post" action="{{ url_for('ratings.upsert_rating_review') }}">
+              <input type="hidden" name="rating_id" value="{{ rating.rating_id }}" />
+              <input type="hidden" name="thumbs_up_down" value="up" />
+              <button type="submit">Thumbs Up</button>
+            </form>
+            <form method="post" action="{{ url_for('ratings.upsert_rating_review') }}">
+              <input type="hidden" name="rating_id" value="{{ rating.rating_id }}" />
+              <input type="hidden" name="thumbs_up_down" value="down" />
+              <button type="submit" class="muted">Thumbs Down</button>
+            </form>
+            <form method="post" action="{{ url_for('ratings.delete_rating_review') }}">
+              <input type="hidden" name="rating_id" value="{{ rating.rating_id }}" />
+              <button type="submit" class="muted">Remove Vote</button>
+            </form>
+          </div>
+        {% endif %}
+
+        {% if current_user.is_authenticated and (current_user.admin or current_user.user_id == rating.user_id) %}
+          <hr />
+          <form method="post" action="{{ url_for('ratings.edit_rating', rating_id=rating.rating_id) }}">
+            <div class="grid">
+              <label>
+                Score
+                <input type="number" name="score" min="0" max="100" value="{{ rating.score }}" required />
+              </label>
+              <label>
+                Tags
+                <input type="text" name="tags" value="{{ rating.tags }}" />
+              </label>
+              <label>
+                Images
+                <input type="text" name="images" value="{{ rating.images }}" />
+              </label>
+            </div>
+            <label>
+              Description
+              <textarea name="description">{{ rating.description }}</textarea>
+            </label>
+            <p class="row-actions">
+              <button type="submit">Update Rating</button>
+            </p>
+          </form>
+          <div class="row-actions">
+            <form method="post" action="{{ url_for('ratings.boost_rating', rating_id=rating.rating_id) }}">
+              <button type="submit" class="muted">+5 Score</button>
+            </form>
+            <form method="post" action="{{ url_for('ratings.delete_rating', rating_id=rating.rating_id) }}">
+              <button type="submit" class="danger">Delete Rating</button>
+            </form>
+          </div>
+        {% endif %}
+      </article>
+    {% else %}
+      <p>No ratings yet.</p>
+    {% endfor %}
+  </section>
+{% endblock %}

@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Profile{% endblock %}
+{% block content %}
+  <section class="card">
+    <h2>Profile</h2>
+    <form method="post">
+      <div class="grid">
+        <label>
+          Username
+          <input type="text" name="username" value="{{ profile.username }}" required />
+        </label>
+        <label>
+          Email
+          <input type="email" name="email" value="{{ profile.email }}" required />
+        </label>
+        <label>
+          Profile Picture URL
+          <input type="url" name="profile_picture" value="{{ profile.profile_picture or '' }}" />
+        </label>
+      </div>
+      <p><button type="submit">Save Profile</button></p>
+    </form>
+  </section>
+
+  <section class="card">
+    <h3>Change Password</h3>
+    <form method="post" action="{{ url_for('auth.change_password') }}">
+      <div class="grid">
+        <label>
+          Current Password
+          <input type="password" name="current_password" required />
+        </label>
+        <label>
+          New Password
+          <input type="password" name="new_password" required />
+        </label>
+      </div>
+      <p><button type="submit">Update Password</button></p>
+    </form>
+  </section>
+
+  <section class="card">
+    <h3>Delete Account</h3>
+    <form method="post" action="{{ url_for('auth.delete_account') }}">
+      <button type="submit" class="danger">Delete My Account</button>
+    </form>
+  </section>
+{% endblock %}

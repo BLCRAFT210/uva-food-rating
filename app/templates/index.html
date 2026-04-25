@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Welcome - UVA Food Rating{% endblock %}
+{% block content %}
+  <section class="card">
+    <h1>UVA Food Rating</h1>
+    <p>Rate dishes, find favorites, and compare dining options with your friends.</p>
+    <div class="row-actions">
+      <a href="{{ url_for('auth.login') }}"><button type="button">Login</button></a>
+      <a href="{{ url_for('auth.register') }}"><button type="button" class="muted">Create Account</button></a>
+    </div>
+  </section>
+{% endblock %}
