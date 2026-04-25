@@ -3,20 +3,39 @@ from contextlib import contextmanager
 import pymysql
 from flask import current_app, g
 from pymysql.cursors import DictCursor
+from google.cloud.sql.connector import Connector
+
+
+# Initialize Cloud SQL Connector
+connector = Connector()
 
 
 def get_db():
     if "db" not in g:
-        g.db = pymysql.connect(
-            host=current_app.config["DB_HOST"],
-            port=current_app.config["DB_PORT"],
-            user=current_app.config["DB_USER"],
-            password=current_app.config["DB_PASSWORD"],
-            database=current_app.config["DB_NAME"],
-            charset="utf8mb4",
-            cursorclass=DictCursor,
-            autocommit=False,
-        )
+        if current_app.config.get("INSTANCE_CONNECTION_NAME"):
+            # Connect using Cloud SQL Connector
+            g.db = connector.connect(
+                current_app.config["INSTANCE_CONNECTION_NAME"],
+                "pymysql",
+                user=current_app.config["DB_USER"],
+                password=current_app.config["DB_PASSWORD"],
+                db=current_app.config["DB_NAME"],
+                charset="utf8mb4",
+                cursorclass=DictCursor,
+                autocommit=False,
+            )
+        else:
+            # Connect using standard PyMySQL (for local dev or direct IP)
+            g.db = pymysql.connect(
+                host=current_app.config["DB_HOST"],
+                port=current_app.config["DB_PORT"],
+                user=current_app.config["DB_USER"],
+                password=current_app.config["DB_PASSWORD"],
+                database=current_app.config["DB_NAME"],
+                charset="utf8mb4",
+                cursorclass=DictCursor,
+                autocommit=False,
+            )
     return g.db
 
 
