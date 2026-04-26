@@ -3,6 +3,9 @@
 {% block content %}
   <section class="card">
     <h2>Profile</h2>
+    <p class="row-actions">
+      <a href="{{ url_for('social.public_profile', username=profile.username) }}"><button type="button" class="muted">View Public Profile</button></a>
+    </p>
     <form method="post">
       <div class="grid">
         <label>

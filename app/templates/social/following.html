@@ -25,7 +25,7 @@
       <tbody>
         {% for user in following %}
           <tr>
-            <td>{{ user.followed_username }}</td>
+            <td><a href="{{ url_for('social.public_profile', username=user.followed_username) }}">{{ user.followed_username }}</a></td>
             <td>{{ user.followed_email }}</td>
             <td>
               <form method="post" action="{{ url_for('social.remove_following') }}">
@@ -55,7 +55,7 @@
       <tbody>
         {% for user in followers %}
           <tr>
-            <td>{{ user.follower_username }}</td>
+            <td><a href="{{ url_for('social.public_profile', username=user.follower_username) }}">{{ user.follower_username }}</a></td>
             <td>{{ user.follower_email }}</td>
           </tr>
         {% else %}
@@ -81,7 +81,7 @@
       <tbody>
         {% for row in following_feed %}
           <tr>
-            <td>{{ row.username }}</td>
+            <td><a href="{{ url_for('social.public_profile', username=row.username) }}">{{ row.username }}</a></td>
             <td>{{ row.dish_name }}</td>
             <td>{{ row.score }}</td>
             <td>{{ row.date_time }}</td>

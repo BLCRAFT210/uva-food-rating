@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}{{ profile_user.username }}{% endblock %}
+{% block content %}
+  <section class="card">
+    <h2>{{ profile_user.username }}</h2>
+    {% if profile_user.profile_picture %}
+      <p>
+        <img src="{{ profile_user.profile_picture }}" alt="{{ profile_user.username }} profile picture" style="max-width: 160px; border-radius: 8px;" />
+      </p>
+    {% endif %}
+    <p class="muted-text">
+      {% if profile_user.admin %}<span class="badge">Admin</span>{% endif %}
+      <span class="badge">Followers: {{ profile_user.follower_count }}</span>
+      <span class="badge">Following: {{ profile_user.following_count }}</span>
+      <span class="badge">Ratings: {{ profile_user.rating_count }}</span>
+      <span class="badge">Avg Score: {{ "%.1f"|format(profile_user.avg_score or 0) }}</span>
+    </p>
+
+    {% if current_user.is_authenticated and current_user.user_id != profile_user.user_id %}
+      <div class="row-actions">
+        {% if is_following %}
+          <form method="post" action="{{ url_for('social.remove_following') }}">
+            <input type="hidden" name="followed_user_id" value="{{ profile_user.user_id }}" />
+            <input type="hidden" name="next" value="{{ request.path }}" />
+            <button type="submit" class="danger">Unfollow</button>
+          </form>
+        {% else %}
+          <form method="post" action="{{ url_for('social.add_following') }}">
+            <input type="hidden" name="follow_user_id" value="{{ profile_user.user_id }}" />
+            <input type="hidden" name="next" value="{{ request.path }}" />
+            <button type="submit">Follow</button>
+          </form>
+        {% endif %}
+      </div>
+    {% endif %}
+  </section>
+
+  <section class="card">
+    <h3>{{ profile_user.username }}'s Activity</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Dish</th>
+          <th>Location</th>
+          <th>Score</th>
+          <th>Date</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in activity %}
+          <tr>
+            <td><a href="{{ url_for('dishes.dish_detail', dish_id=row.dish_id) }}">{{ row.dish_name }}</a></td>
+            <td>{{ row.location_name or "Unassigned" }}</td>
+            <td>{{ row.score }}</td>
+            <td>{{ row.date_time }}</td>
+            <td>{{ row.description or "-" }}</td>
+          </tr>
+        {% else %}
+          <tr>
+            <td colspan="5">No activity yet.</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+{% endblock %}

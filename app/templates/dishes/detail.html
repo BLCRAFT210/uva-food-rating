@@ -94,7 +94,7 @@
     {% for rating in ratings %}
       <article class="card">
         <p>
-          <strong>{{ rating.username }}</strong>
+          <strong><a href="{{ url_for('social.public_profile', username=rating.username) }}">{{ rating.username }}</a></strong>
           rated <strong>{{ rating.score }}</strong>
           <span class="muted-text">on {{ rating.date_time }}</span>
         </p>

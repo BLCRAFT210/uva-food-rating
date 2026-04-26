@@ -22,7 +22,7 @@
         {% for user in users %}
           <tr>
             <td>{{ user.user_id }}</td>
-            <td>{{ user.username }}</td>
+            <td><a href="{{ url_for('social.public_profile', username=user.username) }}">{{ user.username }}</a></td>
             <td>{{ user.email }}</td>
             <td>{{ "Admin" if user.admin else "User" }}</td>
             <td>
@@ -85,7 +85,7 @@
       <tbody>
         {% for row in recent_by_user %}
           <tr>
-            <td>{{ row.username }}</td>
+            <td><a href="{{ url_for('social.public_profile', username=row.username) }}">{{ row.username }}</a></td>
             <td>{{ row.dish_name }}</td>
             <td>{{ row.score }}</td>
             <td>{{ row.date_time }}</td>
