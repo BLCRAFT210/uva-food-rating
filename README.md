@@ -1,6 +1,6 @@
 # UVA Food Rating (Flask + PyMySQL)
 
-This project is a raw-SQL Flask app for rating dishes, managing favorites/friends, and supporting multi-user access with a shared MySQL database.
+This project is a raw-SQL Flask app for rating dishes, managing favorites/following, and supporting multi-user access with a shared MySQL database.
 
 ## Tech Stack
 
@@ -28,7 +28,7 @@ This project is a raw-SQL Flask app for rating dishes, managing favorites/friend
 
 ## Implemented Requirements Mapping
 
-- CRUD through the app for users, dishes, locations, accommodations, ratings, favorites, friends, rating tags/images, and rating reviews.
+- CRUD through the app for users, dishes, locations, accommodations, ratings, favorites, following relationships, rating tags/images, and rating reviews.
 - Optional feature implemented: search/filter + sort on dish listing.
 - Returning users supported via login/logout and persistent account data.
 - Multi-user supported via shared remote MySQL access.

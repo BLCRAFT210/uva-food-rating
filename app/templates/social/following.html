@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}Following{% endblock %}
+{% block content %}
+  <section class="card">
+    <h2>Following</h2>
+    <form method="post" action="{{ url_for('social.add_following') }}" class="grid">
+      <label>
+        Follow by Username
+        <input type="text" name="follow_username" required />
+      </label>
+      <div><button type="submit">Follow</button></div>
+    </form>
+  </section>
+
+  <section class="card">
+    <h3>People You Follow</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Username</th>
+          <th>Email</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for user in following %}
+          <tr>
+            <td>{{ user.followed_username }}</td>
+            <td>{{ user.followed_email }}</td>
+            <td>
+              <form method="post" action="{{ url_for('social.remove_following') }}">
+                <input type="hidden" name="followed_user_id" value="{{ user.followed_user_id }}" />
+                <button type="submit" class="danger">Unfollow</button>
+              </form>
+            </td>
+          </tr>
+        {% else %}
+          <tr>
+            <td colspan="3">You are not following anyone yet.</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+
+  <section class="card">
+    <h3>Your Followers</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Username</th>
+          <th>Email</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for user in followers %}
+          <tr>
+            <td>{{ user.follower_username }}</td>
+            <td>{{ user.follower_email }}</td>
+          </tr>
+        {% else %}
+          <tr>
+            <td colspan="2">No followers yet.</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+
+  <section class="card">
+    <h3>Following Activity Feed</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>User</th>
+          <th>Dish</th>
+          <th>Score</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in following_feed %}
+          <tr>
+            <td>{{ row.username }}</td>
+            <td>{{ row.dish_name }}</td>
+            <td>{{ row.score }}</td>
+            <td>{{ row.date_time }}</td>
+          </tr>
+        {% else %}
+          <tr>
+            <td colspan="4">No recent ratings from followed users.</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+{% endblock %}

@@ -3,7 +3,7 @@ from pymysql.err import IntegrityError
 from flask import Blueprint, abort, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
 
-from app.db import execute, query_all, query_one, transaction
+from app.db import execute, query_all, query_one
 
 
 bp = Blueprint("social", __name__)
@@ -54,15 +54,16 @@ def toggle_favorite():
     return redirect(url_for("dishes.dish_detail", dish_id=dish_id))
 
 
+@bp.get("/following")
 @bp.get("/friends")
 @login_required
-def friends():
-    rows = query_all(
+def following():
+    following_rows = query_all(
         """
         SELECT
-            u2.user_id AS friend_user_id,
-            u2.username AS friend_username,
-            u2.email AS friend_email
+            u2.user_id AS followed_user_id,
+            u2.username AS followed_username,
+            u2.email AS followed_email
         FROM Friends f
         JOIN `User` u2 ON f.friend_user_id = u2.user_id
         WHERE f.user_id = %s
@@ -71,7 +72,21 @@ def friends():
         (current_user.user_id,),
     )
 
-    friend_feed = query_all(
+    follower_rows = query_all(
+        """
+        SELECT
+            u1.user_id AS follower_user_id,
+            u1.username AS follower_username,
+            u1.email AS follower_email
+        FROM Friends f
+        JOIN `User` u1 ON f.user_id = u1.user_id
+        WHERE f.friend_user_id = %s
+        ORDER BY u1.username ASC
+        """,
+        (current_user.user_id,),
+    )
+
+    following_feed = query_all(
         """
         SELECT
             u.username,
@@ -88,61 +103,58 @@ def friends():
         """,
         (current_user.user_id,),
     )
-    return render_template("social/friends.html", friends=rows, friend_feed=friend_feed)
+    return render_template(
+        "social/following.html",
+        following=following_rows,
+        followers=follower_rows,
+        following_feed=following_feed,
+    )
 
 
+@bp.post("/following/add")
 @bp.post("/friends/add")
 @login_required
-def add_friend():
-    friend_username = request.form.get("friend_username", "").strip()
-    if not friend_username:
-        abort(400, "friend_username is required.")
+def add_following():
+    follow_username = request.form.get("follow_username", "").strip()
+    if not follow_username:
+        abort(400, "follow_username is required.")
 
-    friend = query_one(
+    user_to_follow = query_one(
         "SELECT user_id FROM `User` WHERE username = %s",
-        (friend_username,),
+        (follow_username,),
     )
-    if not friend:
+    if not user_to_follow:
         flash("User not found.", "danger")
-        return redirect(url_for("social.friends"))
-    if friend["user_id"] == current_user.user_id:
-        flash("You cannot add yourself.", "danger")
-        return redirect(url_for("social.friends"))
+        return redirect(url_for("social.following"))
+    if user_to_follow["user_id"] == current_user.user_id:
+        flash("You cannot follow yourself.", "danger")
+        return redirect(url_for("social.following"))
 
     try:
-        with transaction() as cursor:
-            cursor.execute(
-                "INSERT INTO Friends (user_id, friend_user_id) VALUES (%s, %s)",
-                (current_user.user_id, friend["user_id"]),
-            )
-            cursor.execute(
-                "INSERT INTO Friends (user_id, friend_user_id) VALUES (%s, %s)",
-                (friend["user_id"], current_user.user_id),
-            )
-        flash("Friend added.", "success")
+        execute(
+            "INSERT INTO Friends (user_id, friend_user_id) VALUES (%s, %s)",
+            (current_user.user_id, user_to_follow["user_id"]),
+        )
+        flash("Now following user.", "success")
     except IntegrityError:
-        flash("Friendship already exists.", "info")
+        flash("You already follow this user.", "info")
 
-    return redirect(url_for("social.friends"))
+    return redirect(url_for("social.following"))
 
 
+@bp.post("/following/remove")
 @bp.post("/friends/remove")
 @login_required
-def remove_friend():
-    friend_user_id_raw = request.form.get("friend_user_id", "").strip()
-    if not friend_user_id_raw.isdigit():
+def remove_following():
+    followed_user_id_raw = request.form.get("followed_user_id", "").strip()
+    if not followed_user_id_raw.isdigit():
         abort(400)
-    friend_user_id = int(friend_user_id_raw)
+    followed_user_id = int(followed_user_id_raw)
 
-    with transaction() as cursor:
-        cursor.execute(
-            "DELETE FROM Friends WHERE user_id = %s AND friend_user_id = %s",
-            (current_user.user_id, friend_user_id),
-        )
-        cursor.execute(
-            "DELETE FROM Friends WHERE user_id = %s AND friend_user_id = %s",
-            (friend_user_id, current_user.user_id),
-        )
+    execute(
+        "DELETE FROM Friends WHERE user_id = %s AND friend_user_id = %s",
+        (current_user.user_id, followed_user_id),
+    )
 
-    flash("Friend removed.", "info")
-    return redirect(url_for("social.friends"))
+    flash("Unfollowed user.", "info")
+    return redirect(url_for("social.following"))
