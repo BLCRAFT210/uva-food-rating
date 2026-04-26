@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS `User` (
     email VARCHAR(255) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL,
     admin BOOLEAN DEFAULT FALSE,
-    profile_picture VARCHAR(255)
+    profile_picture TEXT
 );
 
 CREATE TABLE IF NOT EXISTS Friends (
