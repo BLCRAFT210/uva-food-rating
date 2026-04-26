@@ -11,6 +11,6 @@ class Config:
     DB_HOST = os.getenv("DB_HOST", "127.0.0.1")
     DB_PORT = int(os.getenv("DB_PORT", "3306"))
     DB_USER = os.getenv("DB_USER", "root")
-    DB_PASSWORD = os.getenv("DB_PASSWORD", "")
+    DB_PASSWORD = os.getenv("DB_PASSWORD") or os.getenv("DB_PASS", "")
     DB_NAME = os.getenv("DB_NAME", "uva_food_rating")
     INSTANCE_CONNECTION_NAME = os.getenv("INSTANCE_CONNECTION_NAME")
