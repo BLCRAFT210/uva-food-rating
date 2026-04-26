@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Add Dish{% endblock %}
+{% block content %}
+  <section class="card">
+    <h2>Add Dish</h2>
+    <form method="post" action="{{ url_for('dishes.new_dish') }}">
+      <div class="grid">
+        <label>
+          Dish Name
+          <input type="text" name="dish_name" required />
+        </label>
+        <label>
+          Location
+          <select name="location_id">
+            <option value="">No location</option>
+            {% for location in locations %}
+              <option value="{{ location.location_id }}">{{ location.location_name }}</option>
+            {% endfor %}
+          </select>
+        </label>
+        <label><input type="checkbox" name="vegan" /> Vegan</label>
+        <label><input type="checkbox" name="gluten_free" /> Gluten Free</label>
+        <label><input type="checkbox" name="nuts" /> Contains Nuts</label>
+        <label><input type="checkbox" name="dairy" /> Contains Dairy</label>
+        <label><input type="checkbox" name="seafood" /> Contains Seafood</label>
+      </div>
+      <p class="row-actions">
+        <button type="submit">Create Dish</button>
+        <a href="{{ url_for('dishes.list_dishes') }}"><button type="button" class="muted">Cancel</button></a>
+      </p>
+    </form>
+  </section>
+{% endblock %}

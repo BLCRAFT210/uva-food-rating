@@ -6,6 +6,11 @@
 {% block content %}
   <section class="card">
     <h2>Dishes</h2>
+    {% if current_user.is_authenticated %}
+      <p class="row-actions">
+        <a href="{{ url_for('dishes.new_dish') }}"><button type="button">Add Dish</button></a>
+      </p>
+    {% endif %}
     <form id="dish-filter-form" class="grid">
       <label>
         Search
@@ -97,31 +102,5 @@
       </table>
     </section>
 
-    <section class="card">
-      <h3>Add Dish</h3>
-      <form method="post" action="{{ url_for('dishes.create_dish') }}">
-        <div class="grid">
-          <label>
-            Dish Name
-            <input type="text" name="dish_name" required />
-          </label>
-          <label>
-            Location
-            <select name="location_id">
-              <option value="">No location</option>
-              {% for location in locations %}
-                <option value="{{ location.location_id }}">{{ location.location_name }}</option>
-              {% endfor %}
-            </select>
-          </label>
-          <label><input type="checkbox" name="vegan" /> Vegan</label>
-          <label><input type="checkbox" name="gluten_free" /> Gluten Free</label>
-          <label><input type="checkbox" name="nuts" /> Contains Nuts</label>
-          <label><input type="checkbox" name="dairy" /> Contains Dairy</label>
-          <label><input type="checkbox" name="seafood" /> Contains Seafood</label>
-        </div>
-        <p><button type="submit">Create Dish</button></p>
-      </form>
-    </section>
   {% endif %}
 {% endblock %}

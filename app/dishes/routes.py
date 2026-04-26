@@ -80,6 +80,41 @@ def _fetch_dishes():
     return dishes
 
 
+def _create_dish_from_form():
+    dish_name = request.form.get("dish_name", "").strip()
+    location_id_raw = request.form.get("location_id", "").strip()
+    location_id = int(location_id_raw) if location_id_raw.isdigit() else None
+
+    if not dish_name:
+        abort(400, "Dish name is required.")
+
+    vegan = bool(request.form.get("vegan"))
+    gluten_free = bool(request.form.get("gluten_free"))
+    nuts = bool(request.form.get("nuts"))
+    dairy = bool(request.form.get("dairy"))
+    seafood = bool(request.form.get("seafood"))
+
+    with transaction() as cursor:
+        cursor.execute(
+            """
+            INSERT INTO Accommodations (vegan, gluten_free, nuts, dairy, seafood)
+            VALUES (%s, %s, %s, %s, %s)
+            """,
+            (vegan, gluten_free, nuts, dairy, seafood),
+        )
+        accomm_id = cursor.lastrowid
+        cursor.execute(
+            """
+            INSERT INTO Dish (dish_name, accomm_id, location_id)
+            VALUES (%s, %s, %s)
+            """,
+            (dish_name, accomm_id, location_id),
+        )
+        dish_id = cursor.lastrowid
+
+    return dish_id
+
+
 @bp.get("/")
 def list_dishes():
     dishes = _fetch_dishes()
@@ -90,6 +125,18 @@ def list_dishes():
         locations=locations,
         sort=request.args.get("sort", "avg_desc"),
     )
+
+
+@bp.route("/new", methods=["GET", "POST"])
+@login_required
+def new_dish():
+    if request.method == "POST":
+        dish_id = _create_dish_from_form()
+        flash("Dish created.", "success")
+        return redirect(url_for("dishes.dish_detail", dish_id=dish_id))
+
+    locations = _fetch_locations()
+    return render_template("dishes/new.html", locations=locations)
 
 
 @bp.get("/table")
@@ -168,40 +215,10 @@ def dish_detail(dish_id):
 
 @bp.post("/")
 @login_required
-@admin_required
 def create_dish():
-    dish_name = request.form.get("dish_name", "").strip()
-    location_id_raw = request.form.get("location_id", "").strip()
-    location_id = int(location_id_raw) if location_id_raw.isdigit() else None
-
-    if not dish_name:
-        abort(400, "Dish name is required.")
-
-    vegan = bool(request.form.get("vegan"))
-    gluten_free = bool(request.form.get("gluten_free"))
-    nuts = bool(request.form.get("nuts"))
-    dairy = bool(request.form.get("dairy"))
-    seafood = bool(request.form.get("seafood"))
-
-    with transaction() as cursor:
-        cursor.execute(
-            """
-            INSERT INTO Accommodations (vegan, gluten_free, nuts, dairy, seafood)
-            VALUES (%s, %s, %s, %s, %s)
-            """,
-            (vegan, gluten_free, nuts, dairy, seafood),
-        )
-        accomm_id = cursor.lastrowid
-        cursor.execute(
-            """
-            INSERT INTO Dish (dish_name, accomm_id, location_id)
-            VALUES (%s, %s, %s)
-            """,
-            (dish_name, accomm_id, location_id),
-        )
-
+    dish_id = _create_dish_from_form()
     flash("Dish created.", "success")
-    return redirect(url_for("dishes.list_dishes"))
+    return redirect(url_for("dishes.dish_detail", dish_id=dish_id))
 
 
 @bp.post("/<int:dish_id>/edit")
